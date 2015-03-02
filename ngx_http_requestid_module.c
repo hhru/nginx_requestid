@@ -5,6 +5,7 @@
 
 #define MD5_BHASH_LEN 16
 #define MD5_HASH_LEN 32
+#define TIME_PREFIX_LENGTH 10
 
 typedef struct {
 	ngx_flag_t    enable;
@@ -60,6 +61,7 @@ ngx_module_t  ngx_http_requestid_module = {
 
 static ngx_str_t  ngx_http_requestid = ngx_string("request_id");
 
+static u_char hex[] = "0123456789abcdef";
 
 static ngx_int_t
 ngx_http_requestid_set_variable(ngx_http_request_t *r,
@@ -67,10 +69,9 @@ ngx_http_requestid_set_variable(ngx_http_request_t *r,
 {
     ngx_md5_t                      md5;
     ngx_http_requestid_conf_t      *conf;
-    u_char       				   *p, *end;
+    u_char       				   *end;
 	u_char 						   val[NGX_INT64_LEN*3 + 2];
     u_char 						   hashb[MD5_BHASH_LEN];
-    u_char						   hasht[MD5_HASH_LEN];
 
     conf = ngx_http_get_module_loc_conf(r, ngx_http_requestid_module);
 
@@ -102,14 +103,17 @@ ngx_http_requestid_set_variable(ngx_http_request_t *r,
         return NGX_ERROR;
     }
 
-    p = hasht;
-    static u_char hex[] = "0123456789abcdef";
+    u_char hasht[MD5_HASH_LEN];
 
-    for (i = 0; i < MD5_HASH_LEN; i++) {
-		*p++ = hex[hashb[i] >> 4];
-		*p++ = hex[hashb[i] & 0xf];
+    struct timeval tp;
+    ngx_gettimeofday(&tp);
+    ngx_snprintf(hasht, TIME_PREFIX_LENGTH, "%ui", tp.tv_sec);
+
+    for (i = TIME_PREFIX_LENGTH; i < sizeof(hasht); ++i) {
+		hasht[i] = hex[hashb[i] >> 4];
+		hasht[i] = hex[hashb[i] & 0xf];
     }
-    *p = 0;
+    hasht[i] = 0;
 
     ngx_memcpy(v->data, hasht, v->len);
 
