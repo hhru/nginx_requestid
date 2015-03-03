@@ -5,6 +5,7 @@
 
 #define MD5_BHASH_LEN 16
 #define MD5_HASH_LEN 32
+#define TIME_PREFIX_LENGTH 13
 
 typedef struct {
 	ngx_flag_t    enable;
@@ -60,6 +61,7 @@ ngx_module_t  ngx_http_requestid_module = {
 
 static ngx_str_t  ngx_http_requestid = ngx_string("request_id");
 
+static const u_char hex[] = "0123456789abcdef";
 
 static ngx_int_t
 ngx_http_requestid_set_variable(ngx_http_request_t *r,
@@ -67,10 +69,9 @@ ngx_http_requestid_set_variable(ngx_http_request_t *r,
 {
     ngx_md5_t                      md5;
     ngx_http_requestid_conf_t      *conf;
-    u_char       				   *p, *end;
+    u_char       				   *end;
 	u_char 						   val[NGX_INT64_LEN*3 + 2];
     u_char 						   hashb[MD5_BHASH_LEN];
-    u_char						   hasht[MD5_HASH_LEN];
 
     conf = ngx_http_get_module_loc_conf(r, ngx_http_requestid_module);
 
@@ -93,7 +94,7 @@ ngx_http_requestid_set_variable(ngx_http_request_t *r,
 	v->no_cacheable = 0;
 	v->not_found = 0;
 
-    ngx_uint_t i;
+    ngx_uint_t i, k;
 
     v->len = MD5_HASH_LEN;
 
@@ -102,14 +103,15 @@ ngx_http_requestid_set_variable(ngx_http_request_t *r,
         return NGX_ERROR;
     }
 
-    p = hasht;
-    static u_char hex[] = "0123456789abcdef";
+    u_char hasht[MD5_HASH_LEN];
 
-    for (i = 0; i < MD5_HASH_LEN; i++) {
-		*p++ = hex[hashb[i] >> 4];
-		*p++ = hex[hashb[i] & 0xf];
+    ngx_snprintf(hasht, TIME_PREFIX_LENGTH, "%ui%03d", r->start_sec, r->start_msec);
+
+
+    for (i = TIME_PREFIX_LENGTH, k = 0; ((k < MD5_BHASH_LEN) && (i < MD5_HASH_LEN)); i+=2, ++k) {
+		hasht[i]   = hex[hashb[k] >> 4];
+		hasht[i+1] = hex[hashb[k] & 0xf];
     }
-    *p = 0;
 
     ngx_memcpy(v->data, hasht, v->len);
 
