@@ -1,26 +1,39 @@
-Модуль ngx_http_requestid_module предназначен для генерации уникального идентификатора запроса.
+The ngx_http_requestid_module is designed to generate a unique request identificator.
 
-Результатом работы модуля является переменная nginx $request_id - уникальный идентификатор запроса.
+The module sets $request_id variable with a unique request ID.
 
-Идентификатор представляет собой md5('ngx_pid,connection_number,rand()), где:
+The $request_id variable is composed of (time){13} and (md5(ngx_pid, connection_number, rand())){19}, where:
+  * time - timestamp in milliseconds
+  * ngx_pid - nginx process id
+  * connection_number - connection counter value local to worker process
+  * rand() - random number
 
- * ngx_pid - PID процесса nginx
- * connection_number - текущий COUNTER соединений инстанса nginx
- * rand() - случайное число 
+Supports both old and new configuration methods including dynamic compilation.
 
-Пример конфигурации:
+Example configurations:
 
+# Set Proxy Header
 location / {
-    requestid on;
-    proxy_pass http://127.0.0.1;
-    proxy_set_header X-Request-Id $request_id
+     requestid on;
+     proxy_pass http://127.0.0.1;
+     proxy_set_header X-Request-Id $request_id;
 }
 
-Конфигурация:
 
-syntax: requestid on|off
+# Set HTTP Header
+location / {
+     add_header X-Request-Id $request_id;
+}
+
+# Write request id to log
+log_format main '$remote_addr - $remote_user [$time_local]  '
+		'"$request" $status $body_bytes_sent $request_id '
+		'"$http_referer" "$http_user_agent"';
+
+
+Configuration:
+
+syntax: requestid on | off
 default: off
 context: server, location
 
-Директива активирует работу модуля. 
-Если модуль включен, в переменную $request_id записывается идентификатор запроса. Переменную можно записывать в access_log, используя директиву log_format.
