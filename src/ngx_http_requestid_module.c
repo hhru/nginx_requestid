@@ -78,7 +78,7 @@ ngx_http_requestid_set_variable(ngx_http_request_t *r,
 
     conf = ngx_http_get_module_loc_conf(r, ngx_http_requestid_module);
 
-    if (conf->enable == 0) {
+    if (!conf->enable) {
     	v->not_found = 1;
     	return NGX_OK;
     }
@@ -137,7 +137,7 @@ ngx_http_requestid_merge_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_http_requestid_conf_t *prev = parent;
     ngx_http_requestid_conf_t *conf = child;
 
-    ngx_conf_merge_value(prev->enable, conf->enable, 0);
+    ngx_conf_merge_off_value(conf->enable, prev->enable, 0);
 
     return NGX_CONF_OK;
 }
