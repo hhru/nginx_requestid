@@ -12,7 +12,7 @@ typedef struct {
 } ngx_http_requestid_conf_t;
 
 
-static ngx_str_t ngx_http_requestid = ngx_string("request_id");
+static ngx_str_t ngx_http_requestid = ngx_string("trequest_id");
 static const u_char hex[] = "0123456789abcdef";
 
 static ngx_int_t ngx_http_requestid_add_variables(ngx_conf_t *cf);
@@ -23,7 +23,7 @@ static char *ngx_http_requestid_merge_conf(ngx_conf_t *cf, void *parent,
 
 static ngx_command_t ngx_http_requestid_commands[] = {
     {
-        ngx_string("requestid"),
+        ngx_string("trequestid"),
         NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
         ngx_conf_set_flag_slot,
         NGX_HTTP_LOC_CONF_OFFSET,
