@@ -7,8 +7,8 @@ __DATA__
 === TEST 1: Check request id pattern
 --- config
 location = /test {
-    requestid on;
-    return 200 "$request_id";
+    trequestid on;
+    return 200 "$trequest_id";
 }
 --- request
 GET /test
@@ -17,11 +17,11 @@ GET /test
 
 === TEST 2: Check server and location both on
 --- config
-requestid on;
+trequestid on;
 
 location = /test {
-    requestid on;
-    return 200 "$request_id";
+    trequestid on;
+    return 200 "$trequest_id";
 }
 --- request
 GET /test
@@ -30,10 +30,10 @@ GET /test
 
 === TEST 3: Check server directive only
 --- config
-requestid on;
+trequestid on;
 
 location = /test {
-    return 200 "$request_id";
+    return 200 "$trequest_id";
 }
 --- request
 GET /test
@@ -42,11 +42,11 @@ GET /test
 
 === TEST 4: Check disabled for location
 --- config
-requestid on;
+trequestid on;
 
 location = /test {
-    requestid off;
-    return 200 "$request_id";
+    trequestid off;
+    return 200 "$trequest_id";
 }
 --- request
 GET /test
@@ -55,13 +55,13 @@ GET /test
 
 === TEST 5: Check location with if
 --- config
-requestid on;
+trequestid on;
 
 location = /test {
     if ( $request_method = POST ) {
         return 406;
     }
-    return 200 "$request_id";
+    return 200 "$trequest_id";
 }
 --- request
 GET /test
@@ -70,7 +70,7 @@ GET /test
 
 === TEST 6: Test http context forbidden
 --- http_config
-requestid on;
+trequestid on;
 --- config
 --- must_die
 
@@ -78,7 +78,7 @@ requestid on;
 === TEST 7: No request id by default
 --- config
 location = /test {
-    return 200 "$request_id";
+    return 200 "$trequest_id";
 }
 --- request
 GET /test
