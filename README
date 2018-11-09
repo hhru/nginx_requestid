@@ -1,4 +1,6 @@
-The ngx_http_requestid_module is designed to generate a unique request identificator.
+The ngx_http_requestid_module is designed to generate a unique request identificator with timestamp.
+
+Since nginx 1.11.0 has introduced the $request_id variable, this module is useful only for older versions of nginx or if you need a timestamp prepended request identifier.
 
 The module sets $trequest_id variable with a unique request ID.
 
